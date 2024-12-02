@@ -1,20 +1,23 @@
-FROM maven:3.9.0-eclipse-temurin-17 AS builder
+FROM ubuntu:18.04
 
-WORKDIR /app
+ENV DEBIAN_FRONTEND=noninteractive
 
-COPY pom.xml ./
-RUN mvn dependency:go-offline
+RUN apt-get update && apt-get install -y -q \
+    python-all \
+    python-pip \
+    && apt-get clean
 
-COPY src ./src
+COPY requirements.txt /tmp/
 
-RUN mvn clean package -DskipTests
+RUN pip install -qr /tmp/requirements.txt
 
-FROM tomcat:9.0-jdk17-openjdk-slim
 
-WORKDIR /usr/local/tomcat/webapps
+RUN mkdir -p /opt/webapp
 
-COPY --from=builder /app/target/helloworld-web-1.0-SNAPSHOT.war ./ROOT.war
+COPY . /opt/webapp
 
-EXPOSE 8080
+WORKDIR /opt/webapp
 
-CMD ["catalina.sh", "run"]
+EXPOSE 5000
+
+CMD ["python", "app.py"]
