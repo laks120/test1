@@ -1,0 +1,15 @@
+---
+- name: Setup common environment
+  hosts: all
+  roles:
+    - common
+
+- name: Build Spring Boot application
+  hosts: build_node
+  roles:
+    - build
+
+- name: Deploy Spring Boot application
+  hosts: prod_node
+  roles:
+    - deploy
