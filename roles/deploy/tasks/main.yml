@@ -1,0 +1,29 @@
+---
+- name: Ensure deployment directory exists
+  ansible.builtin.file:
+    path: "/var/www/spring-boot-demo"
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+  become: true
+
+- name: Copy build artifact to prod node
+  ansible.builtin.copy:
+    src: /tmp/spring-boot-demo.jar
+    dest: "/var/www/spring-boot-demo/spring-boot-demo.jar"
+
+- name: Configure systemd for Spring Boot
+  ansible.builtin.template:
+    src: templates/spring-boot.service.j2
+    dest: /etc/systemd/system/spring-boot-demo.service
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+
+- name: Start Spring Boot application
+  ansible.builtin.service:
+    name: spring-boot-demo
+    state: restarted
+  become: true
