@@ -1,0 +1,29 @@
+pipeline {
+    agent { label 'prod-node' } //  продовая ноду
+    environment {
+        DOCKER_IMAGE = '' // имя
+        DOCKER_TAG = '' // тег
+        REGISTRY = 'your-docker-registry.com' // URL
+    }
+    stages {
+        stage('Pull Docker Image') {
+            steps {
+                script {
+                    sh "docker pull ${REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+            }
+        }
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh "docker run -d --name my-container ${REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs() // Очистка рабочей среды
+        }
+    }
+}
